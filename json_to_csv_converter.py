@@ -5,14 +5,14 @@ For more information on the Yelp Dataset Challenge please visit http://yelp.com/
 
 """
 import argparse
-import collections
+import collections.abc
 import csv
 import simplejson as json
 
 
 def read_and_write_file(json_file_path, csv_file_path, column_names):
     """Read in the json dataset file and write it out to a csv file, given the column names."""
-    with open(csv_file_path, 'wb+') as fout:
+    with open(csv_file_path, 'w', newline='') as fout:
         csv_file = csv.writer(fout)
         csv_file.writerow(list(column_names))
         with open(json_file_path) as fin:
@@ -49,9 +49,9 @@ def get_column_names(line_contents, parent_key=''):
 
     """
     column_names = []
-    for k, v in line_contents.iteritems():
+    for k, v in line_contents.items():
         column_name = "{0}.{1}".format(parent_key, k) if parent_key else k
-        if isinstance(v, collections.MutableMapping):
+        if isinstance(v, collections.abc.MutableMapping):
             column_names.extend(
                     get_column_names(v, column_name).items()
                     )
@@ -75,6 +75,7 @@ def get_nested_value(d, key):
         will return: 2
     
     """
+
     if '.' not in key:
         if key not in d:
             return None
@@ -83,6 +84,8 @@ def get_nested_value(d, key):
     if base_key not in d:
         return None
     sub_dict = d[base_key]
+    if sub_dict == None:
+        return None
     return get_nested_value(sub_dict, sub_key)
 
 def get_row(line_contents, column_names):
@@ -93,11 +96,11 @@ def get_row(line_contents, column_names):
                         line_contents,
                         column_name,
                         )
-        if isinstance(line_value, unicode):
-            row.append('{0}'.format(line_value.encode('utf-8')))
-        elif line_value is not None:
-            row.append('{0}'.format(line_value))
+        if line_value is not None:
+            # If line_value is a string, just append it
+            row.append(str(line_value))
         else:
+            # Handle the case where line_value is None
             row.append('')
     return row
 
@@ -117,7 +120,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     json_file = args.json_file
+    print(f"start processing {json_file}.")
     csv_file = '{0}.csv'.format(json_file.split('.json')[0])
 
     column_names = get_superset_of_column_names_from_file(json_file)
     read_and_write_file(json_file, csv_file, column_names)
+
