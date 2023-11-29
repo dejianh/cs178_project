@@ -1,12 +1,15 @@
 import json
 import pandas as pd
 
-# Use your own file address
-data_file = open("yelp_dataset/yelp_academic_dataset_checkin.json") 
-data = []
+data = pd.read_json('yelp_dataset/yelp_academic_dataset_review.json', lines=True)
+#print(data.columns)
 
-for line in data_file:
-    data.append(json.loads(line))
+star1 = data[data['stars'] == 1.0]['text'].tolist()
+#star2 = data[data['stars'] == 2.0]['text'].tolist()
+#star3 = data[data['stars'] == 3.0]['text'].tolist()
+#star4 = data[data['stars'] == 4.0]['text'].tolist()
+#star5 = data[data['stars'] == 5.0]['text'].tolist()
 
-checkin_df = pd.DataFrame(data)
-data_file.close()
+# Print 3 comments from the 1 star review
+for i in range(3):
+    print(star1[i])
