@@ -21,14 +21,15 @@ def process_text(text):
 # too big and causes memeory error
 data_chunks = pd.read_json('yelp_academic_dataset_reviews - Copy.json', lines=True, chunksize=1000)
 
-comment_token_collector_by_star = {1: [],2: [],3: [],4: [],5: []}
-
+comment_token_collector_by_star = {1: [], 2: [], 3: [], 4: [], 5: []}
+star_count = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
 # for each star number, join the list from all trunks and put in list
 
 for chunk in data_chunks:
     for star_number in range(1,6):
         reviews = chunk[chunk['stars'] == star_number]['text'].tolist()
+        star_count[star_number] += len(reviews)
         for review in reviews:
             tokens = process_text(review)
             if tokens is None: 
@@ -45,6 +46,10 @@ for star, freq_dist in word_freq_by_start_dict.items():
     print(f"Most common words for {star}-star reviews:")
     print(freq_dist.most_common(10))
 
+#print number of reviews of each star
+for start, count in star_count.items():
+    print(start , ": " , count, " reviews")
+    
 # make it to be a histgram
 
 # store this in a file, json or some other format.
