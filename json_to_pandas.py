@@ -14,12 +14,14 @@ english_stopwords = set(stopwords.words('english'))
 def process_text(text):
     tokens = word_tokenize(text)
     tokens = [word.lower() for word in tokens if word.isalpha()] #remove punctuation
-    tokens = [word for word in tokens if word not in english_stopwords] #remove stopwords
+    tokens = [word for word in tokens if word not in english_stopwords.union({'would'})] #Add 'would' to stopwords set in case it's missing
+
+
     return tokens
 
 # read json file to pd data chunk list, using line and chunksize because file is
 # too big and causes memeory error
-data_chunks = pd.read_json('yelp_academic_dataset_reviews - Copy.json', lines=True, chunksize=1000)
+data_chunks = pd.read_json('yelp_academic_dataset_review.json', lines=True, chunksize=1000)
 
 comment_token_collector_by_star = {1: [], 2: [], 3: [], 4: [], 5: []}
 star_count = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
@@ -37,12 +39,12 @@ for chunk in data_chunks:
             comment_token_collector_by_star[star_number].extend(tokens)
 
 #dictionary of word frequency
-word_freq_by_start_dict = {star: nltk.FreqDist(tokens) for star, tokens in comment_token_collector_by_star.items()}
+word_freq_by_star_dict = {star: nltk.FreqDist(tokens) for star, tokens in comment_token_collector_by_star.items()}
 # item in dict will be word: number of appearance 
 # example { 1: {like: 1000}}
 
 # print the most common 10 words for comments with various stars
-for star, freq_dist in word_freq_by_start_dict.items():
+for star, freq_dist in word_freq_by_star_dict.items():
     print(f"Most common words for {star}-star reviews:")
     print(freq_dist.most_common(10))
 
@@ -51,9 +53,34 @@ for start, count in star_count.items():
     print(start , ": " , count, " reviews")
     
 # make it to be a histgram
+plt.bar(star_count.keys(), star_count.values(), color='blue')
+plt.xlabel('Star Ratings')
+plt.ylabel('Number of Reviews')
+plt.title('Distribution of Reviews by Star Rating')
+plt.xticks(range(1, 6))  # Set x-ticks to be star ratings
+plt.show()
+
+colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange', 'pink', 'cyan', 'brown', 'gray']
+
+# Print the most common 10 words for comments with various stars
+for star, freq_dist in word_freq_by_star_dict.items():
+    print(f"Most common words for {star}-star reviews:")
+    common_words = freq_dist.most_common(10)
+    print(common_words)
+
+    # Plotting
+    words = [word for word, freq in common_words]
+    frequencies = [freq for word, freq in common_words]
+    plt.figure(figsize=(10, 6))
+    plt.bar(words, frequencies, color=colors[:len(words)])  # Apply different color to each bar
+    plt.xlabel('Words')
+    plt.ylabel('Frequency')
+    plt.title(f'Word Frequency in {star}-Star Reviews')
+    plt.xticks(rotation=45)
+    plt.show()
 
 # store this in a file, json or some other format.
 with open('word_freq_by_star.json', 'w') as f:
-    json.dump({star: freq_dist.most_common(10) for star, freq_dist in word_freq_by_start_dict.items()}, f, ensure_ascii=False)
+    json.dump({star: freq_dist.most_common(10) for star, freq_dist in word_freq_by_star_dict.items()}, f, ensure_ascii=False)
 
 
