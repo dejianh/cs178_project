@@ -1,1 +1,19 @@
-1. splict data set to validation set and training set
+1.get rid of the words that is not important and try to find useful pattern.
+2.maybe do 2 gram processing?
+3.we load database to panda datafram so we can process it better.
+4.we wrote a program to do the processing
+5.we used stop words to aovid unneceesary data, in the future we might add more.
+6.we used 2 gram we get combination of words when we got not good result for 1
+gram.
+7.cross validation.
+8.we are using pytorch model so we understand how pytorch model works and that
+is not taught in class.
+9.build more layers or 
+10. make notes during research.
+11. make google docs.
+12. parameterize the model and control the complexity.
+13. used bag of words text presentation
+14. embedding model
+15. use cross validation to choose the best model according to test result.
+16. store the result in a text file to see how our model is improving.
+17. change the loss function and activating function
